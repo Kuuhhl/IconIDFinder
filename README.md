@@ -10,7 +10,7 @@ pillow
 If you don't have Python installed, I have provided binary versions [here](https://github.com/Kuuhhl/IconIDFinder/releases).
 # How to use it
 1. Start the program:
-* Open main.py / ID Finder.exe
+* Open `main.py` or `ID Finder.exe`
 ![search](readme/searching.gif)
 2. Search for your icon
 * Input your query
