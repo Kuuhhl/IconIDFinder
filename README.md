@@ -11,8 +11,10 @@ If you don't have Python installed, I have provided binary versions [here](https
 # How to use it
 1. Start the program:
 * Open `main.py` or `ID Finder.exe`
-![search](readme/searching.gif)
+![open](readme/open.gif)
+
 2. Search for your icon
+![search](readme/searching.gif)
 * Input your query
 * Press Enter / Search Button
 ![list](readme/list.gif)
