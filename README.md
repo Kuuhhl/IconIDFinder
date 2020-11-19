@@ -18,11 +18,11 @@ If you don't have Python installed, I have provided binary versions [here](https
 ## Search for your icon
 * Input your query
 * Press Enter / Search Button
+* Wait for the program to fetch all icons. This can take a long time, depending on your query.
 
 ![search](readme/searching.gif)
 
 ## View results
-* Wait for the program to fetch all icons. This can take a long time, depending on your query.
 
 ![list](readme/list.gif)
 
