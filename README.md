@@ -16,15 +16,19 @@ If you don't have Python installed, I have provided binary versions [here](https
 ![open](readme/open.gif)
 
 2. Search for your icon
-
-
-![search](readme/searching.gif)
 * Input your query
 * Press Enter / Search Button
 
+![search](readme/searching.gif)
+
+
 
 ![list](readme/list.gif)
+
+
 3. Wait for the program to fetch all icons. This can take a long time, depending on your query. To minimize it, try to be as specific as possible with your search term.
+
+
 4. To copy the ID, press the `Copy ID to Clipboard` button
 
 
