@@ -1,5 +1,5 @@
 # IconIDFinder
-IconIDFinder is a GUI tool to find ID of an icon by searching for a name.
+IconIDFinder is a GUI tool to find ID of a League of Legends summoner icon by searching for a name.
 # Requirements
 ```
 requests
