@@ -16,9 +16,9 @@ If you don't have Python installed, I have provided binary versions [here](https
 ![open](readme/open.gif)
 
 ## Search for your icon
-* Input your query
-* Press Enter / Search Button
-* Wait for the program to fetch all icons. This can take a long time, depending on your query.
+1. Input your query
+2. Press Enter / Search Button
+3. Wait for the program to fetch all icons. This can take a long time, depending on your query.
 
 ![search](readme/searching.gif)
 
