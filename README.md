@@ -6,8 +6,8 @@ Python 3.8
 requests
 pillow
 ```
-# Binary version
-If you don't have Python installed, I have provided binary versions [here](https://github.com/Kuuhhl/IconIDFinder/releases).
+# Download
+If you don't have Python installed, I have provided binary versions for windows [here](https://github.com/Kuuhhl/IconIDFinder/releases).
 # How to use it
 ## Start the program
 * Open `main.py` or `ID Finder.exe`
