@@ -6,7 +6,7 @@ requests
 pillow
 ```
 # Binary version
-If you don't have Python installed, I have provided a binary version here.
+If you don't have Python installed, I have provided binary versions [here](https://github.com/Kuuhhl/IconIDFinder/releases).
 # How to use it
 1. Start the program:
 * Open main.py / ID Finder.exe
@@ -19,4 +19,4 @@ If you don't have Python installed, I have provided a binary version here.
 4. To copy the ID, press the `Copy ID to Clipboard` button
 ![click](readme/click.gif)
 # Issues
-If you have any issues, you can report them at #issues
+If you have any issues, you can report them [here](https://github.com/Kuuhhl/IconIDFinder/issues).
