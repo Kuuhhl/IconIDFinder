@@ -1,12 +1,21 @@
 import requests
 from tkinter import *
-import tkinter.ttk
+from tkinter import ttk
 from io import BytesIO
 from PIL import ImageTk, Image
-import urllib
+import asyncio
+import aiohttp
 
 
-def get_icons(query):
+async def download_image(session, image):
+    async with session.get(image["iconimage"]) as response:
+        if response.status == 200:
+            image["iconimage"] = await response.read()
+            return image
+
+
+def get_icons_data(query):
+    print("Searching for query: " + query)
     r = requests.get(
         "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/summoner-icons.json"
     ).json()
@@ -17,7 +26,6 @@ def get_icons(query):
                 "iconid": x["id"],
                 "iconname": x["title"],
                 "iconreleaseyear": x["yearReleased"],
-                "iconlegacy": x["isLegacy"],
                 "iconimage": (
                     "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/"
                     + str(x["id"])
@@ -38,76 +46,123 @@ def set_clipboard(id):
     r.withdraw()
     r.clipboard_clear()
     r.clipboard_append(id)
-    r.update()  # now it stays on the clipboard after the window is closed
+    r.update()
     r.destroy()
 
 
-def show_results(liste, master, query):
-    print("Searching for query: " + query)
+def on_mousewheel(event, canvas):
+    shift = (event.state & 0x1) != 0
+    scroll = -1 if event.delta > 0 else 1
+    if shift:
+        canvas.xview_scroll(scroll, "units")
+    else:
+        canvas.yview_scroll(scroll, "units")
+
+
+def open_in_browser(id):
+    import webbrowser
+
+    webbrowser.open(
+        f"https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/{id}.jpg",
+        new=2,
+    )
+
+
+def show_results(master, responses, query):
     master.destroy()
-    if liste == []:
-        print("No icons found.")
-        search("")
-        return
     master = Tk()
     master.iconbitmap("icon.ico")
-    master.title("Search results for: " + str(query))
-    master.geometry("570x1000")
+    master.title("Search results for query: " + str(query))
+    master.geometry("800x1000")
     master.resizable(True, False)
     canvas = Canvas(master)
     scroll_y = Scrollbar(master, orient="vertical", command=canvas.yview)
     frame = Frame(canvas)
-    for x in liste:
-        print("Icon found: " + x["iconname"])
-        Label(frame, text=x["iconname"]).pack()
-        Label(frame, text="ID: " + str(x["iconid"])).pack()
-        Label(frame, text="Description: " + x["icondescription"]).pack()
-        Label(frame, text="Released in: " + str(x["iconreleaseyear"])).pack()
-        Label(frame, text="Legacy: " + str(x["iconlegacy"])).pack()
-        try:
-            img = (
-                ImageTk.PhotoImage(
-                    Image.open(
-                        BytesIO(
-                            urllib.request.urlopen(
-                                urllib.request.Request(
-                                    x["iconimage"], headers={"User-Agent": "Mozilla"}
-                                )
-                            ).read()
-                        )
-                    )
-                ),
-            )
-
-            label = Label(frame, image=img)
-            label.img = img
-            label.pack()
-        except urllib.error.HTTPError:
-            pass
+    for response in responses:
+        if response == None:
+            continue
+        Label(frame, text=response["iconname"], font="-weight bold").pack()
+        Label(frame, text="ID: " + str(response["iconid"])).pack()
+        Label(frame, text="Description: " + response["icondescription"]).pack()
+        Label(frame, text="Released in: " + str(response["iconreleaseyear"])).pack()
+        img = ImageTk.PhotoImage(Image.open(BytesIO(response["iconimage"])))
+        label = Label(frame, image=img)
+        label.img = img
+        label.pack()
         idbutton = Button(
             frame,
             text="Copy ID to Clipboard",
-            command=lambda id=x["iconid"]: set_clipboard(id),
+            command=lambda id=response["iconid"]: set_clipboard(id),
         )
         idbutton.pack(fill="x", pady="5")
-        tkinter.ttk.Separator(frame, orient=HORIZONTAL).pack(fill="x", pady="10")
-
+        linkbutton = Button(
+            frame,
+            text="Open image link",
+            command=lambda id=response["iconid"]: open_in_browser(id),
+        )
+        linkbutton.pack(fill="x", pady="5")
+        ttk.Separator(frame, orient=HORIZONTAL).pack(fill="x", pady="10")
     canvas.create_window(0, 0, anchor="nw", window=frame)
     canvas.update_idletasks()
     canvas.configure(scrollregion=canvas.bbox("all"), yscrollcommand=scroll_y.set)
     canvas.pack(fill="both", expand=True, side="left")
     scroll_y.pack(fill="y", side="right")
-    Button(master, text="Restart search", command=lambda: search(master)).pack(
-        side="right", fill="y"
+    Button(
+        master, text="Restart search", command=lambda: [master.destroy(), search()]
+    ).pack(side="right", fill="y")
+    canvas.bind_all("<MouseWheel>", lambda event: on_mousewheel(event, canvas))
+    master.mainloop()
+
+
+async def create_downloads(liste, progress, master, progressLabel):
+    async with aiohttp.ClientSession() as session:  # create aiohttp session
+        tasks = [
+            download_image(session, image) for image in liste  # Create list of tasks
+        ]
+        responses = []
+        progress["value"] = 0
+        totalTasks = len(tasks)
+        for count, t in enumerate(asyncio.as_completed(tasks)):
+            progressLabel["text"] = f"Completed: {count} of {totalTasks}"
+            master.update()
+            progress.step()
+            responses.append(await t)
+        return responses
+
+
+def progress_window(liste, query, master):
+    master.destroy()
+    if liste == []:
+        print("No icons found.")
+        search()
+        return
+    master = Tk()
+    master.iconbitmap("icon.ico")
+    master.title(f"Downloading icons for query: {query}")
+    master.resizable(False, False)
+    progress = ttk.Progressbar(
+        master=master,
+        orient="horizontal",
+        length=500,
+        mode="determinate",
+        maximum=len(liste),
     )
-    print("Finished searching.")
+    progress.pack()
+    progressLabel = Label()
+    progressLabel.pack()
+    master.update()
+
+    show_results(
+        master,
+        asyncio.get_event_loop().run_until_complete(
+            create_downloads(liste, progress, master, progressLabel)
+        ),
+        query,
+    )
+    master.mainloop()
 
 
-def search(master):
-    try:
-        master.destroy()
-    except:
-        pass
+def search():
     master = Tk()
     master.iconbitmap("icon.ico")
     master.title("Search")
@@ -116,16 +171,15 @@ def search(master):
     Label(master, text="Search query: ").pack()
     e = Entry(master, justify="center")
     e.pack(pady="10", fill="x")
-    e.focus_set()
 
     button = Button(
         master,
         text="Search",
-        command=lambda: show_results(get_icons(e.get()), master, e.get()),
+        command=lambda: [progress_window(get_icons_data(e.get()), e.get(), master)],
     )
     button.pack(fill="x", side="bottom")
     master.bind("<Return>", lambda event=None: button.invoke())
     master.mainloop()
 
 
-search("")
+search()
