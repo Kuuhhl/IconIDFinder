@@ -1,5 +1,7 @@
 # IconIDFinder
 IconIDFinder is a GUI tool to find ID of a League of Legends summoner icon by searching for a name.
+
+Click [here](https://kuuhhl.github.io/IconIDFinderJS/) for the JavaScript version (no download needed).
 # Requirements
 ```
 Python 3.8
